@@ -1,0 +1,36 @@
+name: Trivy Security Scan
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Scan filesystem with Trivy
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln
+          severity: CRITICAL,HIGH,MEDIUM,LOW
+          ignore-unfixed: false
+          format: json
+          output: trivy-results.json
+          # Custom conditions are evaluated in the next step.
+          exit-code: '0'
+
+      - name: Display results and check conditions
+        run: python3 scripts/quality_gate.py
+
+      - name: Continue pipeline
+        run: echo "Security gate passed. Continuing pipeline."
