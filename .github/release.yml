@@ -9,6 +9,7 @@ changelog:
     authors:
       - dependabot
       - dependabot[bot]
+      add trivy scan
   categories:
     - title: "Breaking Changes"
       labels:
