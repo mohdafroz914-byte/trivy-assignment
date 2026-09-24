@@ -28,21 +28,21 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v4
 
       - name: Build Agent image
         run: |
           docker build -t awf-agent:${{ github.sha }} ./containers/agent
 
       - name: Run Trivy vulnerability scanner (table output)
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # v0.33.1
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: 'awf-agent:${{ github.sha }}'
           format: 'table'
           severity: 'CRITICAL,HIGH'
 
       - name: Run Trivy vulnerability scanner (SARIF output)
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # v0.33.1
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: 'awf-agent:${{ github.sha }}'
           format: 'sarif'
@@ -63,21 +63,21 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v4
 
       - name: Build Squid image
         run: |
           docker build -t awf-squid:${{ github.sha }} ./containers/squid
 
       - name: Run Trivy vulnerability scanner (table output)
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # v0.33.1
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: 'awf-squid:${{ github.sha }}'
           format: 'table'
           severity: 'CRITICAL,HIGH'
 
       - name: Run Trivy vulnerability scanner (SARIF output)
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # v0.33.1
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: 'awf-squid:${{ github.sha }}'
           format: 'sarif'
