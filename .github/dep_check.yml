@@ -2,9 +2,9 @@ name: OWASP Dependency-Check
 
 on:
   push:
-    branches: [main]
+    branches: claude/fix-github-actions-workflow-agent-again
   pull_request:
-    branches: [main]
+    branches: claude/fix-github-actions-workflow-agent-again
   workflow_dispatch:
 
 permissions:
