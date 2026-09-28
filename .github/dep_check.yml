@@ -1,0 +1,71 @@
+name: OWASP Dependency-Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dependency-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Prepare report and database folders
+        run: |
+          mkdir -p "$RUNNER_TEMP/dc-data"
+          mkdir -p "$GITHUB_WORKSPACE/dependency-check-report"
+
+      - name: Scan repository dependencies
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${NVD_API_KEY:-}" ]; then
+            echo "::error::Missing NVD_API_KEY repository secret."
+            exit 1
+          fi
+
+          # Keep the key outside the repository and scan reports.
+          CONFIG_FILE="$RUNNER_TEMP/dependency-check.properties"
+          umask 077
+          printf 'nvd.api.key=%s\n' "$NVD_API_KEY" > "$CONFIG_FILE"
+          trap 'rm -f "$CONFIG_FILE"' EXIT
+
+          docker run --rm \
+            --user "$(id -u):$(id -g)" \
+            -v "$GITHUB_WORKSPACE:/src:ro" \
+            -v "$RUNNER_TEMP/dc-data:/usr/share/dependency-check/data" \
+            -v "$GITHUB_WORKSPACE/dependency-check-report:/report" \
+            -v "$CONFIG_FILE:/run/dependency-check.properties:ro" \
+            owasp/dependency-check:latest \
+            --project "vscode-codeql" \
+            --scan /src \
+            --exclude "/src/.git/**" \
+            --exclude "/src/dependency-check-data/**" \
+            --exclude "/src/dependency-check-report/**" \
+            --propertyfile /run/dependency-check.properties \
+            --disableOssIndex \
+            --format HTML \
+            --format JSON \
+            --out /report \
+            --failOnCVSS 7
+
+      - name: Upload vulnerability reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-check-reports
+          path: dependency-check-report/
+          if-no-files-found: warn
